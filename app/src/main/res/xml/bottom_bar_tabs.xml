@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tabs>
+
+    <tab
+        activeColor="@color/common_blue"
+        icon="@drawable/icon_msg"
+        id="@+id/tab_news"
+        title="@string/nav_news"/>
+    <tab
+        activeColor="@color/common_blue"
+        icon="@drawable/icon_app"
+        id="@+id/tab_apps"
+        title="@string/nav_apps"/>
+
+    <tab
+        activeColor="@color/common_blue"
+        icon="@drawable/icon_mine"
+        id="@+id/tab_user"
+        title="@string/nav_my"/>
+
+</tabs>

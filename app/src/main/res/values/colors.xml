@@ -1,6 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="colorPrimary">#284FE5</color>
+    <color name="colorPrimaryDark">#0D2A95</color>
+    <color name="colorAccent">#5C7CF2</color>
+    <color name="white">#FFFFFF</color>
+    <color name="common_blue">#284FE5</color>
+    <color name="common_white">#FFFFFF</color>
+
+    <color name="common_bg">#F1F5FF</color>
+    <color name="common_split">#DDDDDD</color>
+    <color name="common_black">#000000</color>
+    <color name="common_tint">#8E8E93</color>
+    <color name="common_value">#D8000000</color>
+    <color name="common_title">#A5000000</color>
+    <color name="common_blue_dark">#0288d1</color>
+    <color name="common_blue_light">#039be5</color>
+    <color name="common_green">#52C41A</color>
+    <color name="common_disable">#d9d9d9</color>
+    <color name="common_divider">#d4d4d4</color>
+    <color name="common_gray">#dddddd</color>
+    <color name="common_gray1">#A2B0E6</color>
+    <color name="common_purple">#d500f9</color>
+    <color name="common_red_nol">#f11919</color>
+    <color name="common_red">#f00</color>
+    <color name="common_yellow">#FFCEC9</color>
+    <color name="common_black_5">#80000000</color>
+    <color name="tip_gray" tools:ignore="MissingDefaultResource">#c3c3c3</color>
+    <color name="color_f6">#f6f6f6</color>
+    <color name="common_black_2">#80222222</color>
+    <color name="common_orange">#FA8F1C</color>
+    <color name="common_gray_50">#908E8E93</color>
+    <color name="color_EE9572">#EE9572</color>
+
+    <color name="transparent">#00000000</color>
+    <color name="text_dark">#999999</color>
+    <color name="text_light_dark">#333333</color>
+    <color name="text_normal">#666666</color>
+    <color name="text_normal1">#ccc</color>
+    <color name="title_bg">#F0F5FF</color>
+
+    <!-- ========================== 自定义 PhotoPicker 颜色 START ========================== -->
+    <!-- PhotoPicker 状态栏的颜色 -->
+    <color name="bga_pp_colorPrimaryDark">@color/colorPrimaryDark</color>
+    <!-- PhotoPicker 导航栏的颜色 -->
+    <color name="bga_pp_navigationBarColor">@color/colorPrimaryDark</color>
+    <!-- PhotoPicker Toolbar 的颜色 -->
+    <color name="bga_pp_colorPrimary">@color/colorPrimary</color>
+    <!-- 图片选择器库里所有Activity界面的背景色 -->
+    <color name="bga_pp_activity_bg">@android:color/white</color>
+    <!-- 文字颜色 -->
+    <color name="bga_pp_common_textColor">@android:color/white</color>
+    <!-- 文件夹名称颜色 -->
+    <color name="bga_pp_folder_name_textColor">#282828</color>
+    <!-- 文件夹中照片数量颜色 -->
+    <color name="bga_pp_folder_count_textColor">#585858</color>
+    <!-- 图片条目背景色 -->
+    <color name="bga_pp_photo_item_bg">#303d42</color>
+    <!-- 拍摄照片文字颜色 -->
+    <color name="bga_pp_take_photo_textColor">#adb2bb</color>
+    <!-- 图片处于选中状态时的遮罩层颜色 -->
+    <color name="bga_pp_photo_selected_mask">#4DFFFFFF</color>
+    <!-- 右上角确认按钮不可用时的颜色 -->
+    <color name="bga_pp_btn_confirm_disabled">@android:color/transparent</color>
+    <!-- 右上角确认按钮可用时的颜色 -->
+    <color name="bga_pp_btn_confirm_enabled">@android:color/transparent</color>
+    <!-- 右上角确认按钮按下时的颜色 -->
+    <color name="bga_pp_btn_confirm_pressed">@android:color/transparent</color>
+    <!-- 预览界面底部背景色 -->
+    <color name="bga_pp_preview_bottom_bg">@color/colorPrimary</color>
+    <!-- 数据加载对话框加载进度条的颜色 -->
+    <color name="bga_pp_loading_progress_startColor">@android:color/white</color>
+    <color name="bga_pp_loading_progress_centerColor">@color/colorPrimaryDark</color>
+    <color name="bga_pp_loading_progress_endColor">@color/colorPrimaryDark</color>
+    <!-- ========================== 自定义 PhotoPicker 颜色 END ========================== -->
 </resources>

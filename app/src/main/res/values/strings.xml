@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">ydyypt</string>
+    <string name="app_name">移动应用</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="nav_news">消息</string>
+    <string name="nav_approval">审批</string>
+    <string name="nav_header">首页</string>
+    <string name="nav_apps">应用</string>
+    <string name="nav_my">我的</string>
 </resources>
