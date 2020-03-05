@@ -4,11 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.lchj.ydyypt">
 
-    <dist:module dist:instant="true" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
@@ -18,19 +13,33 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activity.MainActivity">
-
-        </activity>
-        <activity android:name=".ui.activity.LoginActivity">
+        <activity android:name=".ui.activity.AppsEditActivity"></activity>
+        <activity android:name=".ui.activity.TestActivity"></activity>
+        <activity android:name=".ui.activity.MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.PhotoAddActivity">
+        <activity android:name=".ui.activity.LoginActivity">
 
         </activity>
+        <activity android:name=".ui.activity.PhotoAddActivity"></activity>
     </application>
+    <meta-data
+        android:name="com.lchj.ydyypt.name"
+        android:value="test" />
+
+    <meta-data
+        android:name="com.lchj.ydyypt.version.ver"
+        android:value="1" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 插件名称 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- 插件版本 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <dist:module dist:instant="true" />
 
 </manifest>

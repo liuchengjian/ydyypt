@@ -7,4 +7,5 @@ package com.lchj.ydyypt.common;
 public interface ARouterConst {
     String MAIN = "/ui/activity/MainActivity";
     String PHOTO= "/ui/activity/PhotoAddActivity";
+    String APP_EDIT= "/ui/activity/AppsEditActivity";
 }

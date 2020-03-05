@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.fragment.AppsFragment">
     <include
-       layout="@layout/title_bar"
+        layout="@layout/title_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <com.google.android.material.tabs.TabLayout

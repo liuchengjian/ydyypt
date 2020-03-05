@@ -1,11 +1,7 @@
-package com.lchj.ydyypt.ui.fragment;
+package com.lchj.ydyypt.ui.activity;
 
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -13,47 +9,48 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.blankj.utilcode.util.GsonUtils;
+import com.blankj.utilcode.util.SPStaticUtils;
 import com.google.android.material.tabs.TabLayout;
 import com.lchj.ydyypt.R;
 import com.lchj.ydyypt.bean.AppBean;
 import com.lchj.ydyypt.bean.AppModule;
+import com.lchj.ydyypt.bean.SaveMenuBean;
 import com.lchj.ydyypt.common.ARouterConst;
 import com.lchj.ydyypt.common.Api;
+import com.lchj.ydyypt.common.Const;
 import com.lchj.ydyypt.common.OnAppMenuClickListener;
-import com.lchj.ydyypt.common.OnMenuAddClickListener;
 import com.lchj.ydyypt.common.event.SaveAppMenuEvent;
 import com.lchj.ydyypt.db.GreenDaoUtils;
 import com.lchj.ydyypt.okgo.OkGoHelper;
-import com.lchj.ydyypt.okgo.callback.LogDownloadListener;
+import com.lchj.ydyypt.okgo.ResultInfo;
+import com.lchj.ydyypt.okgo.callback.DialogCallback;
 import com.lchj.ydyypt.ui.adapter.AppsAdapter;
 import com.lchj.ydyypt.utils.LiuUtils;
-import com.lzy.okgo.model.Progress;
+import com.lzy.okgo.model.Response;
 
 import org.simple.eventbus.EventBus;
-import org.simple.eventbus.Subscriber;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
-public class AppsFragment extends Fragment {
+@Route(path = ARouterConst.APP_EDIT)
+public class AppsEditActivity extends BaseActivity {
     @BindView(R.id.mTvTitle)
     TextView mTvTitle;
-    @BindView(R.id.mTvLeft)
-    ImageView mTvLeft;
     @BindView(R.id.mTvRight)
     ImageView mTvRight;
     @BindView(R.id.mTabLayout)
@@ -75,46 +72,16 @@ public class AppsFragment extends Fragment {
     //用于recyclerView滑动到指定的位置
     private boolean canScroll;
     private int scrollToPosition;
-
-    public static AppsFragment newInstance() {
-        AppsFragment fragment = new AppsFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @OnClick({R.id.mTvRight})
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.mTvRight:
-                // 2. 跳转并携带参数
-                ARouter.getInstance().build(ARouterConst.APP_EDIT)
-                        .withString("key3", "888")
-//                                    .withObject("key4", new Test("Jack", "Rose"))
-                        .navigation();
-                break;
-            default:
-                break;
-        }
-
-    }
+    List<SaveMenuBean> saveMenuList = new ArrayList<>();
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_apps, container, false);
-        EventBus.getDefault().register(this);
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        unbinder = ButterKnife.bind(this, view);
-        mTvTitle.setText("应用");
-        mTvLeft.setVisibility(View.INVISIBLE);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_apps_edit);
+        unbinder = ButterKnife.bind(this);
+        mTvTitle.setText("应用编辑");
         mTvRight.setVisibility(View.VISIBLE);
-        mTvRight.setImageResource(R.drawable.icon_app_header_edit);
+        mTvRight.setImageResource(R.drawable.icon_app_save);
         initData();
         initRecyclerView();
     }
@@ -123,15 +90,14 @@ public class AppsFragment extends Fragment {
         localList.clear();
         appList.clear();
         tabTxt.clear();
-        mTabLayout.removeAllTabs();
         localList = GreenDaoUtils.getInstance().queryAllApps();
         Log.e("qqqqq", "appList" + appList);
         if (localList.isEmpty()) {
-            LiuUtils.makeText(getActivity(), "没有App数据！");
+            LiuUtils.makeText(this, "没有App数据！");
             return;
         }
         for (AppBean appBean : localList) {
-            List<AppModule> resMenu = GreenDaoUtils.getInstance().queryAllModuleAdd(appBean);
+            List<AppModule> resMenu = GreenDaoUtils.getInstance().queryAllModule(appBean);
             if (!resMenu.isEmpty() && !TextUtils.isEmpty(appBean.getResMenu().get(0).getResId())) {
                 for (AppModule appModule : resMenu) {
                     appModule.setAppId(appBean.getId());
@@ -148,42 +114,26 @@ public class AppsFragment extends Fragment {
      */
     @SuppressLint("ClickableViewAccessibility")
     private void initRecyclerView() {
-
-        manager = new LinearLayoutManager(getActivity());
+        //计算内容块所在的高度，全屏高度-状态栏高度-tablayout的高度(这里固定高度50dp)，用于recyclerView的最后一个item view填充高度
+        int screenH = LiuUtils.getScreenHeidth(this);
+        int statusBarH = LiuUtils.dip2px(this, 30);
+        int tabH = LiuUtils.dip2px(this, 50);
+        int lastH = screenH - statusBarH - tabH;
+        manager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(manager);
-        if (mAppsAdapter == null) {
-            //计算内容块所在的高度，全屏高度-状态栏高度-tablayout的高度(这里固定高度50dp)，用于recyclerView的最后一个item view填充高度
-            int screenH = LiuUtils.getScreenHeidth(getActivity());
-            int statusBarH = LiuUtils.dip2px(getActivity(), 30);
-            int tabH = LiuUtils.dip2px(getActivity(), 50);
-            int lastH = screenH - statusBarH - tabH;
-            mAppsAdapter = new AppsAdapter(getActivity(), appList, tabTxt, lastH, false);
-            mRecyclerView.setAdapter(mAppsAdapter);
-        } else {
-            mAppsAdapter.notifyDataSetChanged();
-        }
+        mAppsAdapter = new AppsAdapter(this, appList, tabTxt, lastH, true);
+        mRecyclerView.setAdapter(mAppsAdapter);
         mAppsAdapter.setOnAppMenuClickListener(new OnAppMenuClickListener() {
             @Override
             public void onClick(View view, AppBean appBean, AppModule appModule, int pos, int itemPos) {
-                LiuUtils.makeText(getActivity(), appModule.getResName());
-                OkGoHelper.downloadApp(this, Api.DOWNLOAD_URL + "/downloadAttachById?id=" + appBean.getAttachFileId(), new LogDownloadListener() {
-                    @Override
-                    public void onProgress(Progress progress) {
-                        LiuUtils.makeText(getActivity(), "progress" + progress);
-                        super.onProgress(progress);
+                if (GreenDaoUtils.getInstance().isLimitMenu(appModule)) {
+                    if(appModule.getCustom().equals("false")){
+                        LiuUtils.makeText(AppsEditActivity.this, "菜单选中数量不能超过8个");
+                        return;
                     }
-
-                    @Override
-                    public void onFinish(File file, Progress progress) {
-                        LiuUtils.makeText(getActivity(), "progress" + progress);
-                        super.onFinish(file, progress);
-                    }
-
-                    @Override
-                    public void onError(Progress progress) {
-                        super.onError(progress);
-                    }
-                });
+                }
+                GreenDaoUtils.getInstance().changeMenuEditType(appModule);
+                mAppsAdapter.notifyItemChanged(itemPos);
             }
         });
         mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
@@ -242,7 +192,6 @@ public class AppsFragment extends Fragment {
         });
     }
 
-
     /**
      * 移动到指定位置
      *
@@ -271,14 +220,72 @@ public class AppsFragment extends Fragment {
         }
     }
 
-    @Subscriber
-    private void onMessageEvent(SaveAppMenuEvent event) {
-        initData();
-        mAppsAdapter.notifyDataSetChanged();
+    @OnClick({R.id.mTvLeft, R.id.mTvRight})
+    void OnClick(View v) {
+        switch (v.getId()) {
+            case R.id.mTvLeft:
+                finish();
+                break;
+            case R.id.mTvRight:
+                saveMenu();
+                break;
+        }
+    }
+
+    /**
+     * 保存app的模块到网络
+     */
+    private void saveMenu() {
+        if (appList.isEmpty()) return;
+        String appId = "";
+        String userId = SPStaticUtils.getString(Const.userId);
+        int i = 0;
+        for (AppBean app : appList) {
+            if (i == 0) {
+                appId = app.getId();
+            } else {
+                appId = appId + app.getId();
+            }
+            if (!app.getResMenu().isEmpty()) {
+                for (AppModule appModule : app.getResMenu()) {
+                    if (appModule.getCustom().equals("true")) {
+                        saveMenuList.add(new SaveMenuBean(userId, appModule.getResId(), app.getId()));
+                    }
+                }
+            }
+        }
+        if (saveMenuList.isEmpty()) {
+            return;
+        }
+        String json = GsonUtils.toJson(saveMenuList);
+        OkGoHelper.saveAppMenu(this,
+                Api.server_Url + "/user/saveCustomResource",
+                userId,
+                appId,
+                json,
+                new DialogCallback<ResultInfo>(this, "获取用户信息···") {
+                    @Override
+                    public void onSuccess(Response<ResultInfo> response) {
+                        if (response.body().success) {
+                            LiuUtils.makeText(AppsEditActivity.this, response.body().msg);
+                            EventBus.getDefault().post(new SaveAppMenuEvent());
+                            finish();
+                        } else {
+                            LiuUtils.makeText(AppsEditActivity.this, response.body().msg);
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Response<ResultInfo> response) {
+                        super.onError(response);
+                        LiuUtils.makeText(AppsEditActivity.this, response.getException().getMessage());
+                    }
+                });
     }
 
     @Override
-    public void onDestroy() {
+    protected void onDestroy() {
         super.onDestroy();
         unbinder.unbind();
     }

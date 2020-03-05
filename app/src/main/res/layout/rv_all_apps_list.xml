@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:id="@+id/mLLOneAppList"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_margin="5dp"
+        android:id="@+id/mTvAppTitle"
+        android:padding="5dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textSize="@dimen/text_big_size"
+        tools:text="@string/app_name"
+        android:layout_height="wrap_content"/>
+    <com.lchj.ydyypt.ui.widget.AutoLinefeedLayout
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_width="match_parent"
+        android:id="@+id/mLLAppAll"
+        android:padding="10dp"
+        android:gravity="center"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+
