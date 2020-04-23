@@ -1,6 +1,7 @@
 package com.lchj.ydyypt.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,7 +14,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
+import android.os.Environment;
 import android.text.TextUtils;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.blankj.utilcode.util.LogUtils;
 import com.google.android.material.tabs.TabLayout;
 import com.lchj.ydyypt.R;
 import com.lchj.ydyypt.bean.AppBean;
@@ -34,10 +38,15 @@ import com.lchj.ydyypt.common.OnMenuAddClickListener;
 import com.lchj.ydyypt.common.event.SaveAppMenuEvent;
 import com.lchj.ydyypt.db.GreenDaoUtils;
 import com.lchj.ydyypt.okgo.OkGoHelper;
+import com.lchj.ydyypt.okgo.callback.DownLoadFileUtils;
 import com.lchj.ydyypt.okgo.callback.LogDownloadListener;
+import com.lchj.ydyypt.replugin.RePluginHelper;
 import com.lchj.ydyypt.ui.adapter.AppsAdapter;
 import com.lchj.ydyypt.utils.LiuUtils;
+import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.model.Progress;
+import com.lzy.okgo.request.base.Request;
+import com.tbruyelle.rxpermissions.RxPermissions;
 
 import org.simple.eventbus.EventBus;
 import org.simple.eventbus.Subscriber;
@@ -76,6 +85,7 @@ public class AppsFragment extends Fragment {
     private boolean canScroll;
     private int scrollToPosition;
 
+    //    private RxPermissions rxPermissions
     public static AppsFragment newInstance() {
         AppsFragment fragment = new AppsFragment();
         Bundle args = new Bundle();
@@ -162,30 +172,67 @@ public class AppsFragment extends Fragment {
         } else {
             mAppsAdapter.notifyDataSetChanged();
         }
+        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
         mAppsAdapter.setOnAppMenuClickListener(new OnAppMenuClickListener() {
             @Override
             public void onClick(View view, AppBean appBean, AppModule appModule, int pos, int itemPos) {
-                LiuUtils.makeText(getActivity(), appModule.getResName());
-                OkGoHelper.downloadApp(this, Api.DOWNLOAD_URL + "/downloadAttachById?id=" + appBean.getAttachFileId(), new LogDownloadListener() {
-                    @Override
-                    public void onProgress(Progress progress) {
-                        LiuUtils.makeText(getActivity(), "progress" + progress);
-                        super.onProgress(progress);
-                    }
+//                 LiuUtils.makeText(getActivity(), appModule.getResName());
+                String imageUrl = Api.DOWNLOAD_URL + "/downloadAttachById?id=" + appBean.getAttachFileId();//http://47.98.121.127/upload/advert/20180706/1530849977.jpg
+                String localPath = getApkPath();// /storage/emulated/0/image/
+                String mDestFileName = appBean.getAttachFileId() + ".apk";
+//                if (appBean.getIsDownload()) {
+//                    RePluginHelper.installAndJumpToActivity(getActivity(), localPath + "/" + mDestFileName, appBean.getAppCode(), appBean.getAppCode() + "." + appModule.getResCode());
+//                } else {
+                    DownLoadFileUtils.downloadFile(getActivity(), imageUrl, new FileCallback(localPath, mDestFileName) { //文件下载时指定下载的路径以及下载的文件的名称
+                        @Override
+                        public void onStart(Request<File, ? extends Request> request) {
+                            super.onStart(request);
+                        }
 
-                    @Override
-                    public void onFinish(File file, Progress progress) {
-                        LiuUtils.makeText(getActivity(), "progress" + progress);
-                        super.onFinish(file, progress);
-                    }
+                        @Override
+                        public void onSuccess(com.lzy.okgo.model.Response<File> response) {
+                            LogUtils.e("下载文件成功" + "DDDDD" + response.body().length());
+                        }
 
-                    @Override
-                    public void onError(Progress progress) {
-                        super.onError(progress);
-                    }
-                });
-            }
+                        @Override
+                        public void onFinish() {
+                            super.onFinish();
+                            progressDialog.dismiss();
+                            RePluginHelper.installAndJumpToActivity(getActivity(), localPath + "/" + mDestFileName, appBean.getAppCode(), appBean.getAppCode() + "." + appModule.getResCode());
+//                            GreenDaoUtils.getInstance().changeAppDownload(appBean);
+                        }
+
+                        @Override
+                        public void onError(com.lzy.okgo.model.Response<File> response) {
+                            super.onError(response);
+                            LogUtils.e("下载文件出错" + "DDDDD" + response.message());
+                        }
+
+                        @Override
+                        public void downloadProgress(final Progress progress) {
+                            super.downloadProgress(progress);
+//                    dialog = DialogUtils.ZLoadingDialog(LoginActivity.this, "开始下载");
+                            int dLProgress = (int) (progress.fraction * 100);
+                            LogUtils.e("下载文件出错" + "DDDDD" + dLProgress);
+//                        String currentSize = Formatter.formatFileSize(LoginActivity.this, progress.currentSize);
+                            String totalSize = Formatter.formatFileSize(getActivity(), progress.totalSize);
+                            progressDialog.setIcon(R.mipmap.ic_launcher);
+                            progressDialog.setTitle("下载");
+                            progressDialog.setMessage("正在下载中");
+//                        progressDialog.setMax(200);
+                            progressDialog.setProgress(dLProgress);
+                            //ProgressDialog.STYLE_SPINNER  默认进度条是转圈
+                            //ProgressDialog.STYLE_HORIZONTAL  横向进度条
+                            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                            progressDialog.show();
+
+                        }
+
+                    });
+                }
+//            }
         });
+
         mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -281,5 +328,18 @@ public class AppsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         unbinder.unbind();
+    }
+
+    private String getApkPath() {
+        String path = Environment.getExternalStorageDirectory() + ApkPath();
+        File file = new File(path);
+        if (file.mkdirs()) {
+            return path;
+        }
+        return path;
+    }
+
+    private String ApkPath() {
+        return "/download";
     }
 }

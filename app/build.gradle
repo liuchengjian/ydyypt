@@ -81,7 +81,7 @@ repluginHostConfig {
 greendao {
 
     //指定数据库schema版本号，迁移等操作会用到;
-    schemaVersion 6
+    schemaVersion 9
     //dao的包名，包名默认是entity所在的包；
     daoPackage 'com.lchj.ydyypt.bean.dao'
     //生成数据库文件的目录;
@@ -145,6 +145,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'com.zhy:base-rvadapter:3.0.3'
     implementation 'org.simple:androideventbus:1.0.5.1'
+    implementation 'com.github.lzyzsd:circleprogress:1.2.1'
+    implementation 'com.tbruyelle.rxpermissions:rxpermissions:0.9.4@aar'
     // *** ADD ***
 //    implementation 'com.esri.arcgisruntime:arcgis-android:100.7.0'
 
